@@ -36,12 +36,11 @@ bce_loss = torch.nn.BCELoss()
 l2_loss = torch.nn.MSELoss()
 l1_loss = torch.nn.L1Loss()
 
-fixed_noise = torch.randn(4, 100).to(device)
+fixed_noise = torch.randn(5, 100).to(device)
 import numpy as np
 
-# Chọn 64 captions ngẫu nhiên làm fixed embed
-sample_indices = np.random.choice(len(encoded_caption), 4, replace=False)
-fixed_embed_captions_list = [encoded_caption[i] for i in sample_indices]
+sample_indices = ["image_00001", "image_00002", "image_00003", "image_00004", "image_00005"]
+fixed_embed_captions_list = [encoded_caption[i]["embed"] for i in sample_indices]
 fixed_embed_captions = torch.stack(fixed_embed_captions_list).to(device)
 
 epochs = 500
@@ -54,7 +53,7 @@ for epoch in range(epochs):
 
     for batch in dataloader:
         images = batch["image"].to(device)
-        embed_captions = batch["embed_caption"].to(device)
+        embed_captions = batch["embed"].to(device)
         wrong_images = batch["wrong_image"].to(device)
 
         real_labels = torch.ones(images.size(0), 1).to(device)
