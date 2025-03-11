@@ -1,0 +1,7 @@
+requests
+tqdm
+six
+torch
+sentence_transformers
+torchvision
+matplotlib
