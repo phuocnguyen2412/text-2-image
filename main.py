@@ -37,10 +37,9 @@ l2_loss = torch.nn.MSELoss()
 l1_loss = torch.nn.L1Loss()
 
 fixed_noise = torch.randn(5, 100).to(device)
-import numpy as np
 
 sample_indices = ["image_00001", "image_00002", "image_00003", "image_00004", "image_00005"]
-fixed_embed_captions_list = [encoded_caption[i]["embed"] for i in sample_indices]
+fixed_embed_captions_list = [torch.Tensor(encoded_caption[i]["embed"]) for i in sample_indices]
 fixed_embed_captions = torch.stack(fixed_embed_captions_list).to(device)
 
 epochs = 500
@@ -56,29 +55,37 @@ for epoch in range(epochs):
         embed_captions = batch["embed"].to(device)
         wrong_images = batch["wrong_image"].to(device)
 
+        # labels
         real_labels = torch.ones(images.size(0), 1).to(device)
         fake_labels = torch.zeros(images.size(0), 1).to(device)
 
+        # train discriminator
         optimizer_D.zero_grad()
 
+        # gen fake images
         noise = torch.randn(images.size(0), 100).to(device)
         fake_images = generator(noise, embed_captions)
 
+        # compute real loss
         outputs, _ = discriminator(images, embed_captions)
         real_loss = bce_loss(outputs, real_labels)
 
-        outputs, _ = discriminator(wrong_images.detach(), embed_captions)
+        # compute contrastive loss for wrong images
+        outputs, _ = discriminator(wrong_images, embed_captions)
         wrong_loss = bce_loss(outputs, fake_labels)
 
-        outputs, _ = discriminator(fake_images.detach(), embed_captions)
+        # compute fake loss
+        outputs, _ = discriminator(fake_images, embed_captions)
         fake_loss = bce_loss(outputs, fake_labels)
 
         d_loss = real_loss + wrong_loss + fake_loss
 
+        # update weights
         d_loss.backward()
         optimizer_D.step()
         d_losses.append(d_loss.item())
 
+        # train generator
         optimizer_G.zero_grad()
 
         noise = torch.randn(images.size(0), 100).to(device)

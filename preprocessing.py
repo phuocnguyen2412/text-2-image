@@ -33,10 +33,9 @@ class FlowerDataset(Dataset):
         if self.transform:
             wrong_image = self.transform(wrong_image)
 
-
         return {
             "wrong_image": wrong_image,
             "image": image,
             "text": self.captions[image_name]["text"],
-            "embed": self.captions[image_name]["embed"]
+            "embed": torch.Tensor(self.captions[image_name]["embed"])
         }
