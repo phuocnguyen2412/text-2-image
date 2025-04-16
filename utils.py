@@ -16,9 +16,10 @@ def show_grid(image):
 def plot_output(generator, noise, caption_embed, epoch, save_dir="./output_images"):
     os.makedirs(save_dir, exist_ok=True)
     plt.clf()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     with torch.no_grad():
         generator.eval()
-        test_images = generator(noise.to(generator.device), caption_embed.to(generator.device))
+        test_images = generator(noise.to(device), caption_embed.to(device))
         generator.train()
         grid = torchvision.utils.make_grid(test_images.cpu(), normalize=True)
         # Lưu ảnh ra file
